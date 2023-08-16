@@ -11,7 +11,7 @@ from torchvision.ops.boxes import batched_nms, box_area  # type: ignore
 from typing import Any, Dict, List, Optional, Tuple
 
 from .modeling import Sam
-from .predictor import SamPredictor
+from .predictor_finetune import SamPredictor
 from .utils.amg import (
     MaskData,
     area_from_rle,
@@ -133,7 +133,7 @@ class SamAutomaticMaskGenerator:
         self.min_mask_region_area = min_mask_region_area
         self.output_mode = output_mode
 
-    @torch.no_grad()
+    # @torch.no_grad()
     def generate(self, image: np.ndarray) -> List[Dict[str, Any]]:
         """
         Generates masks for the given image.

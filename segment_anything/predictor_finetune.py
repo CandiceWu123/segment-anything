@@ -3,6 +3,7 @@
 
 # This source code is licensed under the license found in the
 # LICENSE file in the root directory of this source tree.
+# 代码没有改动，去掉了mask_decoder前面的no_torch_grad
 
 import numpy as np
 import torch
@@ -165,7 +166,6 @@ class SamPredictor:
         low_res_masks_np = low_res_masks[0].detach().cpu().numpy()
         return masks_np, iou_predictions_np, low_res_masks_np
 
-    @torch.no_grad()
     def predict_torch(
         self,
         point_coords: Optional[torch.Tensor],
@@ -219,11 +219,12 @@ class SamPredictor:
             points = None
 
         # Embed prompts
-        sparse_embeddings, dense_embeddings = self.model.prompt_encoder(
-            points=points,
-            boxes=boxes,
-            masks=mask_input,
-        )
+        with torch.no_grad():
+            sparse_embeddings, dense_embeddings = self.model.prompt_encoder(
+                points=points,
+                boxes=boxes,
+                masks=mask_input,
+            )
 
         # Predict masks
         low_res_masks, iou_predictions = self.model.mask_decoder(
