@@ -101,15 +101,21 @@ class TestData(Dataset):
             support_label_list.append(support_label)
         assert len(support_label_list) == self.shot and len(support_image_list) == self.shot
 
+        """
         s_xs = support_image_list
         s_ys = support_label_list
-        s_x = s_xs[0].unsqueeze(0)
+
+        s_x = s_xs[0][None, ...]
         for i in range(1, self.shot):
-            s_x = torch.cat([s_xs[i].unsqueeze(0), s_x], 0)
+            s_x = np.concatenate([s_xs[i][None,...], s_x], 0)
+            print(type(s_x))
+
         s_y = s_ys[0].unsqueeze(0)
         for i in range(1, self.shot):
             s_y = torch.cat([s_ys[i].unsqueeze(0), s_y], 0)
+            print(type(s_y))
+        """
 
         # Return
-        return image, label, s_x, s_y, class_id
+        return image_path, label_path, support_image_path_list, support_label_path_list, [class_id]
 

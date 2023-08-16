@@ -59,10 +59,6 @@ class MaskData:
     def cat(self, new_stats: "MaskData") -> None:
         for k, v in new_stats.items():
             if k not in self._stats or self._stats[k] is None:
-                print(k)
-                print(v)
-                print(type(k))
-                print(type(v))
                 if torch.is_tensor(v):
                     self._stats[k] = v.clone()
                 else:

@@ -19,6 +19,7 @@ def choose_mask(masks, gt_label):
             final_mask = mask
             intersection = temp_intersection
             union = temp_union
+            max_iou = iou[1]
     return intersection, union, final_mask
 
 
