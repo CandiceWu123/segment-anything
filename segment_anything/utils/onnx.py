@@ -104,7 +104,7 @@ class SamOnnxModel(nn.Module):
 
         return masks, iou_preds
 
-    @torch.no_grad()
+
     def forward(
         self,
         image_embeddings: torch.Tensor,

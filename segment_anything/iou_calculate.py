@@ -7,6 +7,7 @@ def choose_mask(masks, gt_label):
     max_iou = -1
     for i in range(len(masks)):
         mask = masks[i]['segmentation']
+        # mask = masks[i]
         # transform mask to float type
         mask = torch.tensor(mask)
         target_idx = torch.where(mask == True)
@@ -22,6 +23,18 @@ def choose_mask(masks, gt_label):
             max_iou = iou[1]
     return intersection, union, final_mask
 
+def choose_mask_finetune(masks, gt_label):
+    max_iou = -1
+    b, c, h, w = masks.shape
+    masks = masks.reshape(b*c, h, w)
+    for i in range(masks.shape[0]):
+        mask = masks[i]
+        iou, temp_intersection, temp_union = calculate_iou(mask, gt_label)
+        # print("intersection", temp_intersection)
+        if iou[1] > max_iou:
+            final_mask = mask
+            max_iou = iou[1]
+    return final_mask
 
 def calculate_iou(mask, gt_label):
     assert mask.shape == gt_label.shape
@@ -33,4 +46,5 @@ def calculate_iou(mask, gt_label):
     area_target = torch.histc(gt_label, bins=2, min=0, max=1)
     area_union = area_mask + area_target - area_intersection
     iou = area_intersection / (area_union + 1e-10)
+
     return iou, area_intersection, area_union

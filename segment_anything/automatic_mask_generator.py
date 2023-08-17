@@ -36,7 +36,7 @@ class SamAutomaticMaskGenerator:
     def __init__(
         self,
         model: Sam,
-        points_per_side: Optional[int] = 32,
+        points_per_side: Optional[int] = 16,
         points_per_batch: int = 64,
         pred_iou_thresh: float = 0.88,
         stability_score_thresh: float = 0.95,
@@ -204,7 +204,11 @@ class SamAutomaticMaskGenerator:
         data = MaskData()
         for crop_box, layer_idx in zip(crop_boxes, layer_idxs):
             crop_data = self._process_crop(image, crop_box, layer_idx, orig_size)
+            # 下面这行把requires_grad true变成了masks
             data.cat(crop_data)
+
+
+
 
         # Remove duplicate masks between crops
         if len(crop_boxes) > 1:
@@ -218,8 +222,8 @@ class SamAutomaticMaskGenerator:
                 iou_threshold=self.crop_nms_thresh,
             )
             data.filter(keep_by_nms)
-
         data.to_numpy()
+
         return data
 
     def _process_crop(
@@ -244,6 +248,7 @@ class SamAutomaticMaskGenerator:
         for (points,) in batch_iterator(self.points_per_batch, points_for_image):
             batch_data = self._process_batch(points, cropped_im_size, crop_box, orig_size)
             data.cat(batch_data)
+
             del batch_data
         self.predictor.reset_image()
 
@@ -283,6 +288,8 @@ class SamAutomaticMaskGenerator:
             return_logits=True,
         )
 
+
+
         # Serialize predictions and store in MaskData
         data = MaskData(
             masks=masks.flatten(0, 1),
@@ -290,6 +297,7 @@ class SamAutomaticMaskGenerator:
             points=torch.as_tensor(points.repeat(masks.shape[1], axis=0)),
         )
         del masks
+
 
         # Filter by predicted IoU
         if self.pred_iou_thresh > 0.0:
@@ -317,6 +325,7 @@ class SamAutomaticMaskGenerator:
         data["masks"] = uncrop_masks(data["masks"], crop_box, orig_h, orig_w)
         data["rles"] = mask_to_rle_pytorch(data["masks"])
         del data["masks"]
+
 
         return data
 

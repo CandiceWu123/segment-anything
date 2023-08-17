@@ -60,7 +60,6 @@ class SamPredictor:
 
         self.set_torch_image(input_image_torch, image.shape[:2])
 
-    @torch.no_grad()
     def set_torch_image(
         self,
         transformed_image: torch.Tensor,
@@ -219,14 +218,12 @@ class SamPredictor:
             points = None
 
         # Embed prompts
-        with torch.no_grad():
-            sparse_embeddings, dense_embeddings = self.model.prompt_encoder(
+        sparse_embeddings, dense_embeddings = self.model.prompt_encoder(
                 points=points,
                 boxes=boxes,
                 masks=mask_input,
             )
 
-        # Predict masks
         low_res_masks, iou_predictions = self.model.mask_decoder(
             image_embeddings=self.features,
             image_pe=self.model.prompt_encoder.get_dense_pe(),
@@ -235,8 +232,11 @@ class SamPredictor:
             multimask_output=multimask_output,
         )
 
+
+
         # Upscale the masks to the original image resolution
-        masks = self.model.postprocess_masks(low_res_masks, self.input_size, self.original_size)
+
+        masks = self.model.postprocess_masks(low_res_masks, self.input_size, self.original_size).to(self.device)
 
         if not return_logits:
             masks = masks > self.model.mask_threshold

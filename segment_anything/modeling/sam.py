@@ -50,7 +50,6 @@ class Sam(nn.Module):
     def device(self) -> Any:
         return self.pixel_mean.device
 
-    @torch.no_grad()
     def forward(
         self,
         batched_input: List[Dict[str, Any]],
@@ -128,6 +127,7 @@ class Sam(nn.Module):
                     "low_res_logits": low_res_masks,
                 }
             )
+
         return outputs
 
     def postprocess_masks(
@@ -172,3 +172,4 @@ class Sam(nn.Module):
         padw = self.image_encoder.img_size - w
         x = F.pad(x, (0, padw, 0, padh))
         return x
+
